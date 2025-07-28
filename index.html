@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CybX0RCode - Cyberpunk Code Editor</title>
+    <title>CybX0RCode - Advanced Cyberpunk Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
     <style>
         :root {
@@ -13,6 +13,7 @@
             --dark-bg: #0a0a12;
             --panel-bg: #161622;
             --text-color: #e0e0e0;
+            --accent: #7b2dff;
         }
         
         * {
@@ -29,7 +30,7 @@
             height: 100vh;
         }
         
-        /* Simplified Loading Animation */
+        /* Loading Animation */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -65,7 +66,7 @@
             text-shadow: 0 0 8px var(--neon-blue);
         }
         
-        /* Main Editor (initially hidden) */
+        /* Main Editor */
         .editor-container {
             display: none;
             grid-template-columns: 1fr 1fr;
@@ -74,68 +75,214 @@
             padding: 10px;
         }
         
-        /* Rest of your existing editor styles... */
         .editor-panel, .preview-panel {
             background-color: var(--panel-bg);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .editor-panel::before, .preview-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
         }
         
         .panel-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
             color: var(--neon-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab.active {
+            background-color: var(--neon-purple);
+            color: white;
+            border-color: var(--neon-purple);
         }
         
         .editor-area {
-            height: calc(100% - 100px);
-            background: #1e1e2e;
-            border-radius: 6px;
-            padding: 10px;
+            flex-grow: 1;
+            background-color: #1e1e2e;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
         }
         
-        textarea {
+        .editor-textarea {
             width: 100%;
             height: 100%;
             background: transparent;
             border: none;
-            color: white;
+            color: var(--text-color);
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
             resize: none;
             outline: none;
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
         }
         
         .preview-frame {
-            height: calc(100% - 60px);
-            background: #1e1e2e;
-            border-radius: 6px;
-            overflow: hidden;
+            flex-grow: 1;
+            background-color: #1e1e2e;
+            border-radius: 8px;
+            overflow: auto;
         }
         
-        iframe {
+        .preview-frame iframe {
             width: 100%;
             height: 100%;
             border: none;
-            background: white;
+            background-color: white;
+            border-radius: 4px;
+        }
+        
+        .language-selector {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
         }
         
         .controls {
-            margin-top: 10px;
             display: flex;
             gap: 10px;
+            margin-top: 15px;
         }
         
-        button {
+        .btn {
             padding: 8px 15px;
-            background: var(--neon-blue);
+            border-radius: 6px;
             border: none;
-            border-radius: 4px;
-            color: #111;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-run {
+            background-color: var(--neon-blue);
+            color: #111;
+        }
+        
+        .btn-save {
+            background-color: var(--neon-purple);
+            color: white;
+        }
+        
+        .btn-new {
+            background-color: var(--neon-pink);
+            color: white;
+        }
+        
+        .btn-upload {
+            background-color: #7b2dff;
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            border: 1px solid var(--neon-blue);
+        }
+        
+        .modal-title {
+            color: var(--neon-blue);
+            margin-bottom: 15px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
         }
     </style>
 </head>
@@ -146,90 +293,307 @@
         <div class="loading-text">CYBX0RCODE INITIALIZING</div>
     </div>
     
+    <!-- New File Modal -->
+    <div class="modal" id="newFileModal">
+        <div class="modal-content">
+            <h3 class="modal-title">CREATE NEW FILE</h3>
+            <input type="text" class="modal-input" id="newFileName" placeholder="filename.html">
+            <select class="modal-input" id="newFileType">
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="js">JavaScript</option>
+                <option value="php">PHP</option>
+                <option value="py">Python</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="btn" id="cancelNewFile">CANCEL</button>
+                <button class="btn btn-run" id="confirmNewFile">CREATE</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Main Editor -->
     <div class="editor-container" id="editorContainer">
         <div class="editor-panel">
             <div class="panel-header">
-                <h2>EDITOR</h2>
-                <select id="languageSelector">
+                <div class="panel-title">
+                    <span>✧ Editor</span>
+                </div>
+                <select class="language-selector" id="languageSelector">
                     <option value="html">HTML</option>
                     <option value="css">CSS</option>
                     <option value="javascript">JavaScript</option>
+                    <option value="php">PHP</option>
+                    <option value="python">Python</option>
                 </select>
             </div>
+            
+            <div class="tabs" id="fileTabs">
+                <div class="tab active" data-file="index.html">index.html</div>
+                <div class="tab" data-file="style.css">style.css</div>
+                <div class="tab" data-file="script.js">script.js</div>
+                <div class="tab" id="addTabBtn">+</div>
+            </div>
+            
             <div class="editor-area">
-                <textarea id="codeEditor">&lt;!DOCTYPE html&gt;
-&lt;html&gt;
+                <textarea id="codeEditor" class="editor-textarea" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
 &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
     &lt;title&gt;CybX0RCode Project&lt;/title&gt;
-    &lt;style&gt;
-        body {
-            background: #0a0a12;
-            color: #0ff0fc;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        h1 {
-            text-shadow: 0 0 10px #0ff0fc;
-        }
-    &lt;/style&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-    &lt;h1&gt;CYBX0RCODE READY&lt;/h1&gt;
+    &lt;h1&gt;Welcome to CybX0RCode&lt;/h1&gt;
+    &lt;p&gt;Your cyberpunk coding environment&lt;/p&gt;
+    
+    &lt;script src="script.js"&gt;&lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</textarea>
+                <pre><code class="hljs" id="highlightedCode"></code></pre>
             </div>
+            
             <div class="controls">
-                <button id="runBtn">RUN CODE</button>
-                <button id="saveBtn">SAVE</button>
+                <button class="btn btn-run" id="runBtn">
+                    <span>▶</span>
+                    <span>RUN</span>
+                </button>
+                <button class="btn btn-save" id="saveBtn">
+                    <span>⏣</span>
+                    <span>SAVE</span>
+                </button>
+                <button class="btn btn-new" id="newBtn">
+                    <span>+</span>
+                    <span>NEW</span>
+                </button>
+                <button class="btn btn-upload" id="uploadBtn">
+                    <span>↑</span>
+                    <span>UPLOAD</span>
+                </button>
+                <input type="file" id="fileUpload" class="file-input" multiple>
+            </div>
+            
+            <div class="status-bar">
+                <div id="fileInfo">HTML | UTF-8</div>
+                <div id="cursorPosition">Ln 1, Col 1</div>
             </div>
         </div>
         
         <div class="preview-panel">
             <div class="panel-header">
-                <h2>PREVIEW</h2>
-                <span>Auto-refresh: ON</span>
+                <div class="panel-title">
+                    <span>◈ Preview</span>
+                </div>
+                <div class="panel-title">
+                    <span>⟳</span>
+                    <span>Auto-refresh</span>
+                </div>
             </div>
+            
             <div class="preview-frame">
-                <iframe id="previewFrame"></iframe>
+                <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+            
+            <div class="status-bar">
+                <div>http://cybx0rcode.local</div>
+                <div>200 OK</div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/php.min.js"></script>
     <script>
-        // This ensures the loading screen will disappear
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                const loadingScreen = document.getElementById('loadingScreen');
-                loadingScreen.style.opacity = '0';
-                
-                setTimeout(function() {
-                    loadingScreen.style.display = 'none';
-                    document.getElementById('editorContainer').style.display = 'grid';
-                    updatePreview(); // Initialize the preview
-                }, 500);
-            }, 2000); // 2 second loading time
-        });
+        // Initialize highlight.js
+        hljs.highlightAll();
         
-        // Basic editor functionality
-        function updatePreview() {
-            const code = document.getElementById('codeEditor').value;
-            const preview = document.getElementById('previewFrame');
-            preview.srcdoc = code;
-        }
-        
-        document.getElementById('runBtn').addEventListener('click', updatePreview);
-        
-        // Auto-update preview when typing stops
-        let typingTimer;
-        document.getElementById('codeEditor').addEventListener('input', function() {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(updatePreview, 1000);
-        });
-    </script>
+        // Project state
+        const projectState = {
+            files: {
+                'index.html': {
+                    content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CybX0RCode Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Welcome to CybX0RCode</h1>
+    <p>Your cyberpunk coding environment</p>
+    
+    <script src="script.js"></script>
 </body>
-</html>
+</html>`,
+                    language: 'html'
+                },
+                'style.css': {
+                    content: `body {
+    font-family: 'Courier New', monospace;
+    background-color: #0a0a12;
+    color: #0ff0fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+h1 {
+    text-shadow: 0 0 10px #0ff0fc;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}`,
+                    language: 'css'
+                },
+                'script.js': {
+                    content: `// Welcome to CybX0RCode
+console.log('Cyberpunk coding initiated');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('System ready');
+});`,
+                    language: 'javascript'
+                }
+            },
+            currentFile: 'index.html'
+        };
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const editorContainer = document.getElementById('editorContainer');
+        const codeEditor = document.getElementById('codeEditor');
+        const highlightedCode = document.getElementById('highlightedCode');
+        const previewFrame = document.getElementById('previewFrame');
+        const runBtn = document.getElementById('runBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const newBtn = document.getElementById('newBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileUpload = document.getElementById('fileUpload');
+        const fileTabs = document.getElementById('fileTabs');
+        const languageSelector = document.getElementById('languageSelector');
+        const fileInfo = document.getElementById('fileInfo');
+        const cursorPosition = document.getElementById('cursorPosition');
+        const newFileModal = document.getElementById('newFileModal');
+        const newFileName = document.getElementById('newFileName');
+        const newFileType = document.getElementById('newFileType');
+        const confirmNewFile = document.getElementById('confirmNewFile');
+        const cancelNewFile = document.getElementById('cancelNewFile');
+
+        // Initialize the editor
+        function initEditor() {
+            // Load saved project from localStorage
+            const savedProject = localStorage.getItem('cybx0rcode_project');
+            if (savedProject) {
+                try {
+                    const parsed = JSON.parse(savedProject);
+                    projectState.files = parsed.files;
+                    projectState.currentFile = parsed.currentFile || 'index.html';
+                } catch (e) {
+                    console.error('Failed to parse saved project', e);
+                }
+            }
+
+            // Set up the current file
+            updateCurrentFile(projectState.currentFile);
+            renderTabs();
+            
+            // Initialize preview
+            updatePreview();
+        }
+
+        // Update current file in editor
+        function updateCurrentFile(filename) {
+            if (!projectState.files[filename]) {
+                // Create new file if it doesn't exist
+                const extension = filename.split('.').pop();
+                let defaultContent = '';
+                let language = 'plaintext';
+                
+                switch(extension) {
+                    case 'html':
+                        defaultContent = `<!DOCTYPE html>\n<html>\n<head>\n\t<title>New File</title>\n</head>\n<body>\n\n</body>\n</html>`;
+                        language = 'html';
+                        break;
+                    case 'css':
+                        defaultContent = `/* New CSS File */\nbody {\n\t\n}`;
+                        language = 'css';
+                        break;
+                    case 'js':
+                        defaultContent = `// New JavaScript File\nconsole.log('Hello from CybX0RCode');`;
+                        language = 'javascript';
+                        break;
+                    case 'php':
+                        defaultContent = `<?php\n// New PHP File\necho "Hello World!";\n?>`;
+                        language = 'php';
+                        break;
+                    case 'py':
+                        defaultContent = `# New Python File\nprint("Hello World!")`;
+                        language = 'python';
+                        break;
+                }
+                
+                projectState.files[filename] = {
+                    content: defaultContent,
+                    language: language
+                };
+            }
+            
+            projectState.currentFile = filename;
+            codeEditor.value = projectState.files[filename].content;
+            
+            // Update language selector
+            languageSelector.value = projectState.files[filename].language;
+            
+            // Update file info
+            fileInfo.textContent = `${filename.split('.').pop().toUpperCase()} | UTF-8`;
+            
+            // Highlight syntax
+            updateSyntaxHighlighting();
+        }
+
+        // Render file tabs
+        function renderTabs() {
+            fileTabs.innerHTML = '';
+            
+            Object.keys(projectState.files).forEach(filename => {
+                const tab = document.createElement('div');
+                tab.className = `tab ${filename === projectState.currentFile ? 'active' : ''}`;
+                tab.textContent = filename;
+                tab.dataset.file = filename;
+                
+                tab.addEventListener('click', () => {
+                    // Save current file before switching
+                    projectState.files[projectState.currentFile].content = codeEditor.value;
+                    
+                    // Switch to new file
+                    updateCurrentFile(filename);
+                    
+                    // Update active tab
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+                
+                fileTabs.appendChild(tab);
+            });
+            
+            // Add "+" tab
+            const addTab = document.createElement('div');
+            addTab.className = 'tab';
+            addTab.id = 'addTabBtn';
+            addTab.textContent = '+';
+            addTab.addEventListener('click', () => {
+                newFileModal.style.display = 'flex';
+                newFileName.focus();
+            });
+            fileTabs.appendChild(addTab);
+        }
+
+        // Update syntax highlighting
+        function updateSyn
